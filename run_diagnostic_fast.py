@@ -1,4 +1,4 @@
-"""MDD vs nonMDD diagnostic — light GridSearchCV + permutation test, n_jobs=2."""
+"""MDD vs nonMDD diagnostic — fixed hyperparams + permutation test, n_jobs=2."""
 import json, datetime, numpy as np
 from pathlib import Path
 from imblearn.pipeline import Pipeline as ImbPipeline
@@ -44,7 +44,7 @@ FIXED_PIPES = {
 
 
 if __name__ == "__main__":
-    print("=== MDD vs nonMDD Diagnostic (GridSearchCV + Perm) ===")
+    print("=== MDD vs nonMDD Diagnostic (Fixed Pipes + Perm) ===")
     feats = load_cached_features()
     print(f"Cached: EO={len(feats['EO'])}, EC={len(feats['EC'])}")
 
@@ -143,7 +143,7 @@ if __name__ == "__main__":
               f"SEN={m['sensitivity']:.3f}  SPE={m['specificity']:.3f}  {ps}")
 
     output = {
-        "task": "MDD_vs_nonMDD_diagnostic",
+        "task": "MDD_vs_nonMDD_diagnostic_fixed_pipes",
         "timestamp": datetime.datetime.now().isoformat(),
         "n_subjects": int(X.shape[0]), "n_features": int(X.shape[1]),
         "label_counts": counts, "models": results,
