@@ -62,16 +62,13 @@ def classify(X, y, groups, n_splits=5, n_permutations=1000, random_state=42) -> 
 
     results = {}
     for name, (pipe, param_grid) in MODEL_REGISTRY.items():
-        probas, preds, test_indices, fold_thresholds = [], [], [], []
+        probas, preds, test_indices = [], [], []
         for train_idx, test_idx in outer_cv.split(X, y_enc, groups):
             gs = GridSearchCV(pipe, param_grid, cv=inner_cv, scoring="roc_auc", refit=True, n_jobs=1)
             gs.fit(X[train_idx], y_enc[train_idx], groups=groups[train_idx])
             probas.append(gs.predict_proba(X[test_idx])[:, mdd_idx])
             preds.append(gs.predict(X[test_idx]))
             test_indices.append(test_idx)
-            tr_proba = gs.predict_proba(X[train_idx])[:, mdd_idx]
-            fpr_t, tpr_t, thr_t = roc_curve(y_enc[train_idx], tr_proba, pos_label=mdd_idx)
-            fold_thresholds.append(float(thr_t[int(np.argmax(tpr_t - fpr_t))]))
 
         order = np.argsort(np.concatenate(test_indices))
         proba = np.concatenate(probas)[order]
@@ -83,7 +80,8 @@ def classify(X, y, groups, n_splits=5, n_permutations=1000, random_state=42) -> 
         sensitivity = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
         specificity = float(tn / (tn + fp)) if (tn + fp) > 0 else 0.0
 
-        opt_thresh = float(np.mean(fold_thresholds))
+        fpr_oof, tpr_oof, thr_oof = roc_curve(y_enc, proba, pos_label=mdd_idx)
+        opt_thresh = float(thr_oof[int(np.argmax(tpr_oof - fpr_oof))])
         pred_opt = np.where(proba >= opt_thresh, mdd_idx, 1 - mdd_idx)
         tn_o, fp_o, fn_o, tp_o = confusion_matrix(y_enc, pred_opt).ravel()
         sen_opt = float(tp_o / (tp_o + fn_o)) if (tp_o + fn_o) > 0 else 0.0
