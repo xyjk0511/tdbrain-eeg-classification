@@ -20,3 +20,20 @@ FREQ_BANDS = {
 FRONTAL_CHANNELS = ["F3", "F4", "Fz", "F7", "F8"]
 
 N_FEATURES_SELECT = 50  # SelectKBest k inside Pipeline CV
+
+# --- Connectivity constants (Phase 11) ---
+ROI_GROUPS = {
+    "Frontal":   ["Fp1", "Fp2", "F7", "F3", "Fz", "F4", "F8", "FC3", "FCz", "FC4"],
+    "Central":   ["C3", "Cz", "C4"],
+    "Temporal":  ["T7", "T8"],
+    "Parietal":  ["CP3", "CPz", "CP4", "P7", "P3", "Pz", "P4", "P8"],
+    "Occipital": ["O1", "Oz", "O2"],
+}
+
+CONN_BANDS = {
+    "theta": (4, 8),
+    "alpha": (8, 13),
+    "beta":  (13, 30),
+}
+
+CONN_CACHE_DIR = Path("cache_connectivity")
