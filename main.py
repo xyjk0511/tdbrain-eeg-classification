@@ -6,35 +6,30 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from config import CONDITIONS, N_FEATURES_SELECT
+from config import CONDITIONS, EEG_CHANNELS, N_FEATURES_SELECT
 from data_loader import load_subjects, load_raw
 from preprocessor import preprocess
 from feature_extractor import extract_features
 from classifier import classify
 
-CHANNELS = [
-    "Fp1","Fp2","F7","F3","Fz","F4","F8",
-    "T3","C3","Cz","C4","T4","T5","P3","Pz","P4","T6",
-    "O1","O2","A1","A2","F9","F10","T9","T10","Iz"
-]
 BANDS = ["delta","theta","alpha","beta","gamma"]
 
 def _feat_names_496():
     names = []
     for band in BANDS:
-        for ch in CHANNELS:
+        for ch in EEG_CHANNELS:
             names.append(f"abs_{band}_{ch}")
     for band in BANDS:
-        for ch in CHANNELS:
+        for ch in EEG_CHANNELS:
             names.append(f"rel_{band}_{ch}")
     names += ["TBR", "FAA"]
     for prefix in ("hjorth_act", "hjorth_mob", "hjorth_comp"):
-        for ch in CHANNELS:
+        for ch in EEG_CHANNELS:
             names.append(f"{prefix}_{ch}")
-    for ch in CHANNELS:
+    for ch in EEG_CHANNELS:
         names.append(f"SE_broad_{ch}")
     for band in BANDS:
-        for ch in CHANNELS:
+        for ch in EEG_CHANNELS:
             names.append(f"SE_{band}_{ch}")
     return names
 

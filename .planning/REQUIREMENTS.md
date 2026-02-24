@@ -29,7 +29,7 @@
 ### Output
 
 - [x] **OUT-01**: results.json 包含三模型 AUC/ACC/SEN/SPE/p-value 对比
-- [ ] **OUT-02**: SHAP TreeExplainer 对最优模型输出特征重要性排名（post-hoc，不用于特征选择）
+- [x] **OUT-02**: SHAP TreeExplainer 对最优模型输出特征重要性排名（post-hoc，不用于特征选择）
 
 ## v1.2 Requirements
 
@@ -55,7 +55,7 @@
 ### Ensemble
 
 - [x] **ENS-01**: SVM+RF+XGB 软投票集成（预测概率平均），走相同 StratifiedGroupKFold nested CV
-- [ ] **ENS-02**: 集成模型 AUC ≥ 0.800（当前 0.798，继续优化）
+- [ ] **ENS-02**: ~~集成模型 AUC ≥ 0.800~~ → 正式 deferred（当前 0.798，差距 0.002，留 v2 功能连接特征后再评估）
 - [x] **ENS-03**: 集成结果以 `ensemble` key 加入 results.json
 
 ## v2 Requirements
@@ -89,7 +89,13 @@
 | FUS-02 | Phase 7 | Complete |
 | FUS-03 | Phase 7 | Complete |
 | OUT-01 | Phase 7 | Complete |
-| OUT-02 | Phase 8 | Pending |
+| OUT-02 | Phase 8 | Complete |
+| THR-01 | Phase 10 | Complete |
+| THR-02 | Phase 10 | Complete (revised) |
+| THR-03 | Phase 10 | Complete |
+| ENS-01 | Phase 10 | Complete |
+| ENS-02 | Phase 10 | Deferred |
+| ENS-03 | Phase 10 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 14 total

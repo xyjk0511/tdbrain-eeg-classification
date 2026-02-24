@@ -32,24 +32,23 @@ def test_classify_returns_expected_metrics_and_config():
         random_state=42,
     )
 
-    expected_keys = {
-        "auc",
-        "accuracy",
-        "sensitivity",
-        "specificity",
-        "permutation_pvalue",
-        "n_permutations",
-        "n_splits",
-    }
-    assert expected_keys.issubset(result.keys())
-    assert result["n_permutations"] == 20
-    assert result["n_splits"] == 4
+    assert set(result.keys()) == {"svm", "rf", "xgb", "ensemble"}
 
-    assert 0.0 <= result["auc"] <= 1.0
-    assert 0.0 <= result["accuracy"] <= 1.0
-    assert 0.0 <= result["sensitivity"] <= 1.0
-    assert 0.0 <= result["specificity"] <= 1.0
-    assert 0.0 <= result["permutation_pvalue"] <= 1.0
+    per_model_keys = {"auc", "accuracy", "sensitivity", "specificity", "n_splits"}
+    for name in ("svm", "rf", "xgb"):
+        m = result[name]
+        assert per_model_keys.issubset(m.keys()), f"{name} missing keys"
+        assert m["n_permutations"] == 20
+        assert m["n_splits"] == 4
+        assert 0.0 <= m["auc"] <= 1.0
+        assert 0.0 <= m["accuracy"] <= 1.0
+        assert 0.0 <= m["sensitivity"] <= 1.0
+        assert 0.0 <= m["specificity"] <= 1.0
+        assert 0.0 <= m["permutation_pvalue"] <= 1.0
+
+    ens = result["ensemble"]
+    assert 0.0 <= ens["auc"] <= 1.0
+    assert ens["n_splits"] == 4
 
 
 def test_no_group_leakage():
@@ -80,5 +79,6 @@ def test_result_stability():
     kwargs = dict(n_splits=4, n_permutations=10, random_state=0)
     r1 = classify(X, y, groups, **kwargs)
     r2 = classify(X, y, groups, **kwargs)
-    for key in ("auc", "accuracy", "sensitivity", "specificity", "permutation_pvalue"):
-        assert r1[key] == r2[key], f"{key} differs: {r1[key]} vs {r2[key]}"
+    for model in ("svm", "rf", "xgb"):
+        for key in ("auc", "accuracy", "sensitivity", "specificity", "permutation_pvalue"):
+            assert r1[model][key] == r2[model][key], f"{model}.{key} differs"
