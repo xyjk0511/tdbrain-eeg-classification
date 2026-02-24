@@ -3,8 +3,18 @@ __pycache__/
 *.pyo
 .pytest_cache/
 *.egg-info/
-.planning/phases/*/test.txt
-.planning/phases/*/write_verification.py
+
+# Internal planning docs
+.planning/
+
+# Claude Code settings
+.claude/
+
+# Cache directories
+cache_connectivity/
+cache_diagnostic/
+
+# Scratch files
 bad_id.txt
 cols.txt
 test2.py
@@ -12,3 +22,10 @@ test3.py
 test4.py
 test4.txt
 test_eo.py
+
+# Diagnostic/sweep results (keep main results.json and shap_summary.json)
+results_diagnostic.json
+results_feat_sweep.json
+
+# Shell scripts
+run_phase10.sh

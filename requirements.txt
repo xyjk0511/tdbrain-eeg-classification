@@ -1,0 +1,9 @@
+mne>=1.11.0
+numpy>=2.0
+scipy>=1.17.0
+scikit-learn>=1.8.0
+xgboost>=3.0
+imbalanced-learn>=0.14
+shap>=0.46
+antropy>=0.1.9
+mne-connectivity>=0.7.0
