@@ -8,6 +8,15 @@
 
 用频谱特征（theta/beta ratio、alpha 不对称）在 TDBRAIN 上跑通 MDD vs ADHD 分类，置换检验显著即为成功。
 
+## Current Milestone: v2.0 Stacking + 功能连接
+
+**Goal:** 用 stacking meta-learner 替代软投票集成，加入功能连接特征（coherence/PLV），冲击 AUC≥0.800
+
+**Target features:**
+- Stacking ensemble（meta-learner 替代 soft-vote）
+- 功能连接特征（coherence、PLV）
+- EC/EO 差值特征（如拼接方案增益不足）
+
 ## Requirements
 
 ### Validated
@@ -17,18 +26,23 @@
 - ✓ StratifiedGroupKFold 交叉验证（按 subject 分组，防数据泄露） — v1.0
 - ✓ 1000 次置换检验，报告 AUC 和 p 值 — v1.0
 - ✓ 结果达到 AUC > 0.70 且 p < 0.05 — v1.0 (AUC=0.796, p=0.001)
+- ✓ Hjorth 参数 + spectral entropy 特征 — v1.1
+- ✓ SVM/RF/XGBoost 多模型对比 + SelectKBest — v1.1
+- ✓ EC/EO 双条件特征融合（992维） — v1.1
+- ✓ SHAP post-hoc 特征重要性 — v1.1
+- ✓ SMOTE 类别平衡 + 阈值放宽至150µV — v1.2
+- ✓ Youden 阈值优化 + 软投票集成 — v1.3 (ENS AUC=0.798, BA=0.753)
 
-### Active (v1.1)
+### Active (v2.0)
 
-- [ ] 加入时域/复杂度特征：Hjorth 参数（activity/mobility/complexity）+ spectral entropy
-- [ ] 特征选择/降维：SHAP 或 SelectKBest 筛掉噪声特征
-- [ ] EC 条件支持 + EC/EO 双条件特征融合
-- [ ] 换更强分类器：XGBoost / Random Forest，与 SVM 对比
+- [ ] Stacking ensemble（meta-learner 替代 soft-vote）
+- [ ] 功能连接特征（coherence/PLV）
+- [ ] AUC≥0.800 目标
 
 ### Out of Scope
 
 - ERP 特征（P300）— 留后续 milestone
-- 功能连接特征 — 留后续 milestone
+- 深度学习（EEGNet/CNN）— 与 sklearn 架构不兼容
 - 实时推断 / 临床部署 — 纯研究验证
 
 ## Context
@@ -58,4 +72,4 @@
 | drop_duplicates 去重受试者 | participants.tsv 存在重复行 | ✓ Good — 477 唯一受试者 |
 
 ---
-*Last updated: 2026-02-23 after v1.0 milestone*
+*Last updated: 2026-02-24 after v2.0 milestone start*

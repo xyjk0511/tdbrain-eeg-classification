@@ -2,19 +2,17 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-23)
+See: .planning/PROJECT.md (updated 2026-02-24)
 
-**Core value:** 用频谱特征在 TDBRAIN 上验证 MDD vs ADHD 分类可行性，AUC > 0.70 且置换检验显著
-**Current focus:** v1.1 — 性能提升
+**Core value:** 用 stacking + 功能连接特征突破 AUC=0.798 瓶颈
+**Current focus:** v2.0 — Stacking + 功能连接
 
 ## Current Position
 
-Phase: Phase 10
-Plan: 01
-Status: Phase 10 plan 01 complete — threshold optimization + ensemble
-Last activity: 2026-02-24 — Phase 10-01 shipped (Youden threshold on OOF, soft-vote ensemble, RF AUC=0.796 BA=0.734, ENS AUC=0.798 BA=0.753)
-
-Progress: [██████████] 100% (v1.1)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-24 — Milestone v2.0 started
 
 ## Performance Metrics
 
