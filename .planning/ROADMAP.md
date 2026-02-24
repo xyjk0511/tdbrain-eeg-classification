@@ -44,6 +44,9 @@
   - Files: connectivity_extractor.py (NEW), config.py (MODIFIED)
   - Risk: MEDIUM — mne-connectivity API, ROI mapping correctness
   - Goal: 每条件输出 ~90 维 wPLI 连接特征向量，缓存到 .npz
+  - **Plans:** 1 plan
+  - Plans:
+    - [ ] 11-01-PLAN.md — wPLI extraction + ROI averaging + disk caching
 
 - [ ] Phase 12: Manual Stacking Ensemble — 手动 stacking 替换 soft-vote，可先用现有 992 维验证
   - Requirements: STK-01, STK-02, STK-03, STK-04
@@ -87,7 +90,7 @@ Phase 11 和 Phase 12 互相独立，可并行开发。Phase 13 依赖两者完�
 | 8. SHAP Analysis | v1.1 | 1/1 | Complete | 2026-02-23 |
 | 9. Data Quality + Class Balance | v1.2 | 1/1 | Complete | 2026-02-23 |
 | 10. Threshold + Ensemble | v1.3 | 1/1 | Complete | 2026-02-24 |
-| 11. wPLI Connectivity | v2.0 | 0/? | Pending | — |
+| 11. wPLI Connectivity | v2.0 | 0/1 | Planning | — |
 | 12. Manual Stacking | v2.0 | 0/? | Pending | — |
 | 13. Integration + k Sweep | v2.0 | 0/? | Pending | — |
 | 14. Permutation Test | v2.0 | 0/? | Pending | — |
