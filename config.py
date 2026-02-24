@@ -1,6 +1,6 @@
 from pathlib import Path
 
-DATASET_ROOT = Path(r"D:\eeg\TDBRAIN-dataset")
+DATASET_ROOT = Path(r"D:\eeg\data\tdbrain_dataset")
 PARTICIPANTS_TSV = DATASET_ROOT / "participants.tsv"
 CONDITIONS = ["EO", "EC"]
 
