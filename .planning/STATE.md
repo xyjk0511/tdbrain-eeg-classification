@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 
 ## Current Position
 
-Phase: Phase 9
+Phase: Phase 10
 Plan: 01
-Status: Phase 9 plan 01 complete — data quality + class balance
-Last activity: 2026-02-23 — Phase 9-01 shipped (REJECT_THRESHOLD=150uV, SMOTE in ImbPipeline, RF AUC=0.796 SPE=0.606 n_subjects=493)
+Status: Phase 10 plan 01 complete — threshold optimization + ensemble
+Last activity: 2026-02-24 — Phase 10-01 shipped (Youden threshold on OOF, soft-vote ensemble, RF AUC=0.796 BA=0.734, ENS AUC=0.798 BA=0.753)
 
 Progress: [██████████] 100% (v1.1)
 

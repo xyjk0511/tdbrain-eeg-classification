@@ -38,9 +38,9 @@
 
 ## v1.3 Phases
 
-- [ ] Phase 10: Threshold Optimization + Ensemble — 最优分类阈值 + SVM/RF/XGB 软投票集成 (classifier.py)
+- [x] Phase 10: Threshold Optimization + Ensemble — 最优分类阈值 + SVM/RF/XGB 软投票集成 (classifier.py)
   - Plans: 1
-  - [ ] 10-01-PLAN.md — Youden-index threshold per model + soft-vote ensemble
+  - [x] 10-01-PLAN.md — Youden-index threshold per model + soft-vote ensemble
 
 ## Progress
 
@@ -55,4 +55,4 @@
 | 7. EC/EO Fusion | v1.1 | 1/1 | Complete | 2026-02-23 |
 | 8. SHAP Analysis | v1.1 | 1/1 | Complete | 2026-02-23 |
 | 9. Data Quality + Class Balance | v1.2 | 1/1 | Complete | 2026-02-23 |
-| 10. Threshold + Ensemble | v1.3 | 0/1 | Pending | — |
+| 10. Threshold + Ensemble | v1.3 | 1/1 | Complete | 2026-02-24 |
