@@ -1,11 +1,18 @@
 """wPLI connectivity feature extractor with ROI averaging and disk caching."""
 
+import hashlib
 import warnings
 import numpy as np
 from itertools import combinations_with_replacement
 from mne_connectivity import spectral_connectivity_epochs
 
 from config import EEG_CHANNELS, ROI_GROUPS, CONN_BANDS, CONN_CACHE_DIR
+
+
+def _config_hash() -> str:
+    """Deterministic hash of connectivity config for cache invalidation."""
+    key = repr((EEG_CHANNELS, dict(ROI_GROUPS), dict(CONN_BANDS)))
+    return hashlib.sha256(key.encode()).hexdigest()[:12]
 
 
 def extract_connectivity(epochs, sid: str, cond: str) -> np.ndarray:
@@ -16,9 +23,12 @@ def extract_connectivity(epochs, sid: str, cond: str) -> np.ndarray:
     """
     cache_path = CONN_CACHE_DIR / cond / f"{sid}.npz"
 
-    # Cache hit — return immediately
+    # Cache hit — return if config hash matches
+    cfg_hash = _config_hash()
     if cache_path.exists():
-        return np.load(cache_path)["conn"]
+        cached = np.load(cache_path, allow_pickle=True)
+        if cached.get("cfg_hash", np.array("")).item() == cfg_hash:
+            return cached["conn"]
 
     # Warn on low epoch count
     if len(epochs) < 10:
@@ -84,6 +94,6 @@ def extract_connectivity(epochs, sid: str, cond: str) -> np.ndarray:
 
     # Cache to disk
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    np.savez(cache_path, conn=result)
+    np.savez(cache_path, conn=result, cfg_hash=np.array(cfg_hash))
 
     return result
