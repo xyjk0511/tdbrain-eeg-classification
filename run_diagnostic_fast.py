@@ -14,6 +14,7 @@ from xgboost import XGBClassifier
 from config import CONDITIONS, N_FEATURES_SELECT
 
 CACHE_DIR = Path("cache_diagnostic")
+BASELINE_VERSION = "baseline_fixed_v1"
 RS = 42
 N_JOBS = 2
 N_PERM = 10
@@ -144,6 +145,7 @@ if __name__ == "__main__":
 
     output = {
         "task": "MDD_vs_nonMDD_diagnostic_fixed_pipes",
+        "version": BASELINE_VERSION,
         "timestamp": datetime.datetime.now().isoformat(),
         "n_subjects": int(X.shape[0]), "n_features": int(X.shape[1]),
         "label_counts": counts, "models": results,
