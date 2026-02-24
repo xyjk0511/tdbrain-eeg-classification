@@ -50,9 +50,12 @@
 
 - [ ] Phase 12: Manual Stacking Ensemble — 手动 stacking 替换 soft-vote，可先用现有 992 维验证
   - Requirements: STK-01, STK-02, STK-03, STK-04
-  - Files: classifier.py (MODIFIED)
+  - Files: classifier.py (MODIFIED), main.py (MODIFIED)
   - Risk: MEDIUM — OOF meta-feature 生成、groups 泄露防护
   - Goal: stacking AUC ≥ soft-vote AUC (0.798)，结果写入 results.json
+  - **Plans:** 1 plan
+  - Plans:
+    - [ ] 12-01-PLAN.md — Stacking OOF loop + meta-learner + metrics + diagnostics
 
 - [ ] Phase 13: Connectivity Integration + k Sweep — 连接特征拼接 + SelectKBest k 优化
   - Requirements: CON-04, TUN-01
