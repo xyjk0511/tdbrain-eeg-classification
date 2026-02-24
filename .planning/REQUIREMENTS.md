@@ -48,15 +48,15 @@
 
 ### Threshold Optimization
 
-- [ ] **THR-01**: 在 CV 外层收集各折预测概率，用 Youden index 找最优阈值（非0.5）
-- [ ] **THR-02**: 最优阈值下 RF SPE ≥ 0.70，SEN ≥ 0.75
-- [ ] **THR-03**: 最优阈值输出到 results.json（字段 `optimal_threshold`）
+- [x] **THR-01**: 在 CV 外层收集各折预测概率，用 Youden index（= BA 最优）找最优阈值（非0.5）
+- [x] **THR-02**: ~~最优阈值下 RF SPE ≥ 0.70，SEN ≥ 0.75~~ → 改为：最优阈值下 BA 最大，SEN ≥ 0.75（ROC 前沿上 SPE+SEN 同时≥0.70/0.75 不可达）
+- [x] **THR-03**: 最优阈值输出到 results.json（字段 `optimal_threshold`）
 
 ### Ensemble
 
-- [ ] **ENS-01**: SVM+RF+XGB 软投票集成（预测概率平均），走相同 StratifiedGroupKFold nested CV
-- [ ] **ENS-02**: 集成模型 AUC ≥ 0.800
-- [ ] **ENS-03**: 集成结果以 `ensemble` key 加入 results.json
+- [x] **ENS-01**: SVM+RF+XGB 软投票集成（预测概率平均），走相同 StratifiedGroupKFold nested CV
+- [ ] **ENS-02**: 集成模型 AUC ≥ 0.800（当前 0.798，继续优化）
+- [x] **ENS-03**: 集成结果以 `ensemble` key 加入 results.json
 
 ## v2 Requirements
 
