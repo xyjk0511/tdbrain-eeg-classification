@@ -1,106 +1,96 @@
-# Requirements: TDBRAIN MDD vs ADHD — v1.1 Performance Improvement
+# Requirements: TDBRAIN MDD vs ADHD — v2.0 Stacking + Functional Connectivity
 
-**Defined:** 2026-02-23
-**Core Value:** 在 v1.0 基础上（AUC=0.796）通过新特征、多模型、EC/EO融合提升分类性能
+**Defined:** 2026-02-24
+**Core Value:** 用 stacking + 功能连接特征突破 AUC=0.798 瓶颈
 
-## v1.1 Requirements
+## v2.0 Requirements
 
-### Features
+### Connectivity
 
-- [x] **FEAT-01**: 提取 Hjorth 参数（Activity/Mobility/Complexity），26通道 × 3 = 78维特征
-- [x] **FEAT-02**: 提取宽带 spectral entropy，26通道 = 26维特征
-- [x] **FEAT-03**: 提取分频段 spectral entropy（5频段 × 26通道 = 130维），复用现有 Welch PSD
-- [x] **FEAT-04**: Hjorth 计算使用 `epochs.get_data(units="uV")`，验证 Activity 均值在 10–500 µV²
+- [ ] **CON-01**: 安装 mne-connectivity，提取 wPLI（非 coherence/PLV），theta/alpha/beta 3频段 × 325 对
+- [ ] **CON-02**: ROI 平均（5 ROI → 15 对），每条件 ~90 维连接特征
+- [ ] **CON-03**: 连接特征缓存到磁盘（.npz），避免重复计算
+- [ ] **CON-04**: 连接特征拼接到现有 992 维，EC/EO 融合后 ~1172 维
 
-### Classifier
+### Stacking
 
-- [x] **CLF-01**: 添加 model registry，支持 SVM / Random Forest / XGBoost 三模型对比
-- [x] **CLF-02**: SelectKBest(k=50) 作为 Pipeline 步骤（非独立预处理），防止特征选择泄露
-- [x] **CLF-03**: XGBoost 内层 CV 网格包含 max_depth=[2,3,4]，防止小样本过拟合
-- [x] **CLF-04**: permutation test 的 fixed_pipe 与主 pipeline 结构保持一致（含 selector 步骤）
-- [x] **CLF-05**: classify() 返回每个模型的独立结果 dict
+- [ ] **STK-01**: 手动 stacking 循环（非 StackingClassifier），StratifiedGroupKFold 生成 OOF meta-features
+- [ ] **STK-02**: LogisticRegression(C=1.0) 作为 meta-learner，passthrough=False
+- [ ] **STK-03**: SMOTE 仅在 base model ImbPipeline 内部，stacking 层不做过采样
+- [ ] **STK-04**: Stacking 结果以 `stacking` key 写入 results.json
 
-### Fusion
+### Tuning
 
-- [x] **FUS-01**: 支持 EC 条件 EEG 加载与特征提取（复用现有 data_loader + preprocessor）
-- [x] **FUS-02**: 按 subject 取 EO/EC 交集，丢弃缺失任一条件的受试者（不做插值）
-- [x] **FUS-03**: 拼接 EO+EC 特征向量（~732维），groups 数组与 X 行数对齐
+- [ ] **TUN-01**: SelectKBest k sweep（k=50,80,100,150），选最优 k
+- [ ] **TUN-02**: 置换检验覆盖完整 stacking pipeline（非单模型）
 
-### Output
+## Archived: v1.1–v1.3 (All Complete)
 
-- [x] **OUT-01**: results.json 包含三模型 AUC/ACC/SEN/SPE/p-value 对比
-- [x] **OUT-02**: SHAP TreeExplainer 对最优模型输出特征重要性排名（post-hoc，不用于特征选择）
+<details>
+<summary>v1.1 Requirements (14/14 complete)</summary>
 
-## v1.2 Requirements
+- [x] **FEAT-01**: Hjorth 参数 78维
+- [x] **FEAT-02**: 宽带 spectral entropy 26维
+- [x] **FEAT-03**: 分频段 spectral entropy 130维
+- [x] **FEAT-04**: Hjorth µV² 验证
+- [x] **CLF-01**: SVM/RF/XGB model registry
+- [x] **CLF-02**: SelectKBest(k=50) in Pipeline
+- [x] **CLF-03**: XGBoost max_depth=[2,3,4]
+- [x] **CLF-04**: permutation test fixed_pipe 一致
+- [x] **CLF-05**: classify() 返回独立结果 dict
+- [x] **FUS-01**: EC 条件加载
+- [x] **FUS-02**: EO/EC 交集
+- [x] **FUS-03**: EO+EC 拼接
+- [x] **OUT-01**: results.json 三模型对比
+- [x] **OUT-02**: SHAP 特征重要性
 
-### Data Quality
+</details>
 
-- [ ] **DQ-01**: 放宽 epoch 拒绝阈值至 150µV（当前100µV），减少 EC 条件受试者丢失
-- [ ] **DQ-02**: 验证放宽后 EC 条件可用受试者数量增加，交集 subjects > 456
+<details>
+<summary>v1.2 Requirements (3/3 complete)</summary>
 
-### Class Balance
+- [x] **DQ-01**: epoch 阈值放宽至 150µV
+- [x] **BAL-01**: SMOTE 过采样
+- [x] **BAL-02/03**: SPE 提升验证
 
-- [ ] **BAL-01**: 在 CV 内层对训练集应用 SMOTE 过采样，解决 ADHD(159) vs MDD(297) 不平衡
-- [ ] **BAL-02**: 验证 SPE（ADHD识别率）从当前 0.465 提升至 ≥ 0.55
-- [ ] **BAL-03**: AUC 不低于当前最优 0.787（RF）
+</details>
 
-## v1.3 Requirements
+<details>
+<summary>v1.3 Requirements (5/6 complete, 1 deferred)</summary>
 
-### Threshold Optimization
+- [x] **THR-01**: Youden index 最优阈值
+- [x] **THR-02**: BA 最大化（revised）
+- [x] **THR-03**: optimal_threshold 输出
+- [x] **ENS-01**: 软投票集成
+- [ ] **ENS-02**: AUC ≥ 0.800 → deferred to v2.0
+- [x] **ENS-03**: ensemble key in results.json
 
-- [x] **THR-01**: 在 CV 外层收集各折预测概率，用 Youden index（= BA 最优）找最优阈值（非0.5）
-- [x] **THR-02**: ~~最优阈值下 RF SPE ≥ 0.70，SEN ≥ 0.75~~ → 改为：最优阈值下 BA 最大，SEN ≥ 0.75（ROC 前沿上 SPE+SEN 同时≥0.70/0.75 不可达）
-- [x] **THR-03**: 最优阈值输出到 results.json（字段 `optimal_threshold`）
-
-### Ensemble
-
-- [x] **ENS-01**: SVM+RF+XGB 软投票集成（预测概率平均），走相同 StratifiedGroupKFold nested CV
-- [ ] **ENS-02**: ~~集成模型 AUC ≥ 0.800~~ → 正式 deferred（当前 0.798，差距 0.002，留 v2 功能连接特征后再评估）
-- [x] **ENS-03**: 集成结果以 `ensemble` key 加入 results.json
-
-## v2 Requirements
-
-- **ADV-01**: EC/EO 差值特征（仅当拼接方案 AUC 增益 <0.01 时考虑）
-- **ADV-02**: 功能连接特征（coherence/PLV）— 3380+ 维，留后续 milestone
+</details>
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
+| EC/EO 差值连接特征 | 信噪比低，仅当拼接方案有效后考虑 |
+| All-pairs 连接（3250维） | 维度灾难，必须 ROI 平均 |
+| 深度学习 meta-learner | 仅 3 输入，过拟合风险 |
 | ERP 特征（P300） | 留后续 milestone |
-| 深度学习（EEGNet/CNN） | 与现有 sklearn 架构不兼容 |
+| 深度学习（EEGNet/CNN） | 与 sklearn 架构不兼容 |
 | 实时推断/临床部署 | 纯研究验证 |
-| SHAP 用于特征选择 | 会引入泄露，仅用于事后解释 |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FEAT-01 | Phase 5 | Complete |
-| FEAT-02 | Phase 5 | Complete |
-| FEAT-03 | Phase 5 | Complete |
-| FEAT-04 | Phase 5 | Complete |
-| CLF-01 | Phase 6 | Complete |
-| CLF-02 | Phase 6 | Complete |
-| CLF-03 | Phase 6 | Complete |
-| CLF-04 | Phase 6 | Complete |
-| CLF-05 | Phase 6 | Complete |
-| FUS-01 | Phase 7 | Complete |
-| FUS-02 | Phase 7 | Complete |
-| FUS-03 | Phase 7 | Complete |
-| OUT-01 | Phase 7 | Complete |
+| FEAT-01~04 | Phase 5 | Complete |
+| CLF-01~05 | Phase 6 | Complete |
+| FUS-01~03, OUT-01 | Phase 7 | Complete |
 | OUT-02 | Phase 8 | Complete |
-| THR-01 | Phase 10 | Complete |
-| THR-02 | Phase 10 | Complete (revised) |
-| THR-03 | Phase 10 | Complete |
-| ENS-01 | Phase 10 | Complete |
+| THR-01~03, ENS-01/03 | Phase 10 | Complete |
 | ENS-02 | Phase 10 | Deferred |
-| ENS-03 | Phase 10 | Complete |
-
-**Coverage:**
-- v1.1 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0 ✓
+| CON-01~04 | TBD | Pending |
+| STK-01~04 | TBD | Pending |
+| TUN-01~02 | TBD | Pending |
 
 ---
-*Requirements defined: 2026-02-23*
+*Requirements defined: 2026-02-24*
