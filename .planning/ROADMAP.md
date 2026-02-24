@@ -43,7 +43,7 @@
   - Requirements: CON-01, CON-02, CON-03
   - Files: connectivity_extractor.py (NEW), config.py (MODIFIED)
   - Risk: MEDIUM — mne-connectivity API, ROI mapping correctness
-  - Goal: 每条件输出 ~90 维 wPLI 连接特征向量，缓存到 .npz
+  - Goal: 每条件输出 45 维 wPLI 连接特征向量（15 ROI 对 × 3 频段），缓存到 .npz（EC+EO 融合后 90 维，见 Phase 13）
   - **Plans:** 1 plan
   - Plans:
     - [ ] 11-01-PLAN.md — wPLI extraction + ROI averaging + disk caching
