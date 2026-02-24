@@ -39,7 +39,7 @@
 
 ## v2.0 Phases
 
-- [ ] Phase 11: wPLI Connectivity Extraction — 新建 connectivity_extractor.py，wPLI + ROI 平均 + 磁盘缓存
+- [x] Phase 11: wPLI Connectivity Extraction — 新建 connectivity_extractor.py，wPLI + ROI 平均 + 磁盘缓存 (completed 2026-02-24)
   - Requirements: CON-01, CON-02, CON-03
   - Files: connectivity_extractor.py (NEW), config.py (MODIFIED)
   - Risk: MEDIUM — mne-connectivity API, ROI mapping correctness
@@ -93,7 +93,7 @@ Phase 11 和 Phase 12 互相独立，可并行开发。Phase 13 依赖两者完�
 | 8. SHAP Analysis | v1.1 | 1/1 | Complete | 2026-02-23 |
 | 9. Data Quality + Class Balance | v1.2 | 1/1 | Complete | 2026-02-23 |
 | 10. Threshold + Ensemble | v1.3 | 1/1 | Complete | 2026-02-24 |
-| 11. wPLI Connectivity | v2.0 | 0/1 | Planning | — |
+| 11. wPLI Connectivity | 1/1 | Complete   | 2026-02-24 | — |
 | 12. Manual Stacking | v2.0 | 0/? | Pending | — |
 | 13. Integration + k Sweep | v2.0 | 0/? | Pending | — |
 | 14. Permutation Test | v2.0 | 0/? | Pending | — |

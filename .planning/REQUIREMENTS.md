@@ -7,9 +7,9 @@
 
 ### Connectivity
 
-- [ ] **CON-01**: 安装 mne-connectivity，提取 wPLI（非 coherence/PLV），theta/alpha/beta 3频段 × 325 对
-- [ ] **CON-02**: ROI 平均（5 ROI → 15 对），每条件 45 维连接特征（EC+EO 融合后 90 维，见 Phase 13）
-- [ ] **CON-03**: 连接特征缓存到磁盘（.npz），避免重复计算
+- [x] **CON-01**: 安装 mne-connectivity，提取 wPLI（非 coherence/PLV），theta/alpha/beta 3频段 × 325 对
+- [x] **CON-02**: ROI 平均（5 ROI → 15 对），每条件 45 维连接特征（EC+EO 融合后 90 维，见 Phase 13）
+- [x] **CON-03**: 连接特征缓存到磁盘（.npz），避免重复计算
 - [ ] **CON-04**: 连接特征拼接到现有 992 维，EC/EO 融合后 ~1172 维
 
 ### Stacking

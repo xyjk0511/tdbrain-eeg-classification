@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 11 — wPLI Connectivity Extraction
-Plan: 0 of ?
-Status: Ready to plan
-Last activity: 2026-02-24 — Roadmap created (Phases 11-14)
+Plan: 1 of 1
+Status: Phase 11 complete
+Last activity: 2026-02-24 — Completed 11-01-PLAN.md (wPLI connectivity extraction)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 11 min
-- Total execution time: 1.35 hours
+- Total execution time: 1.47 hours
 
 **By Phase:**
 
@@ -31,6 +31,7 @@ Last activity: 2026-02-24 — Roadmap created (Phases 11-14)
 | 04-classification-output | 1 | 20 min | 20 min |
 | 06-classifier-registry | 1 | 2 min | 2 min |
 | 09-data-quality-class-balance | 1 | 35 min | 35 min |
+| 11-wpli-connectivity | 1 | 7 min | 7 min |
 
 ## Accumulated Context
 
@@ -56,6 +57,9 @@ Last activity: 2026-02-24 — Roadmap created (Phases 11-14)
 - REJECT_THRESHOLD raised to 150e-6 (150uV) — recovers 37 subjects vs 100uV, n_subjects=493
 - SMOTE inside ImbPipeline between scaler and selector — oversampling on training folds only, no leakage
 - k_neighbors=5 for SMOTE — default, safe for ~160 ADHD training samples per fold
+- mne_connectivity 0.7+ returns full 26x26 matrix (676), not upper-tri (325) — use np.tril_indices for lower-triangle extraction
+- np.abs(wPLI) for magnitude-only connectivity values in [0,1]
+- combinations_with_replacement for 15 ROI pairs (10 inter + 5 intra-ROI)
 
 ### Pending Todos
 
@@ -68,5 +72,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: v2.0 milestone initialized — roadmap ready
+Stopped at: Completed 11-01-PLAN.md (wPLI connectivity extraction)
 Resume file: None
