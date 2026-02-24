@@ -1,0 +1,46 @@
+{
+  "task": "MDD_vs_nonMDD_diagnostic_fast",
+  "timestamp": "2026-02-23T18:00:55.867570",
+  "n_subjects": 1138,
+  "n_features": 992,
+  "label_counts": {
+    "MDD": 305,
+    "nonMDD": 833
+  },
+  "models": {
+    "svm": {
+      "auc": 0.6653690984590558,
+      "balanced_accuracy": 0.6134532501525201,
+      "sensitivity": 0.780327868852459,
+      "specificity": 0.44657863145258103,
+      "optimal_threshold": 0.21988550782403493,
+      "sensitivity_at_threshold": 0.8819672131147541,
+      "specificity_at_threshold": 0.3793517406962785
+    },
+    "rf": {
+      "auc": 0.6600436896069903,
+      "balanced_accuracy": 0.5743884439021509,
+      "sensitivity": 0.40327868852459015,
+      "specificity": 0.7454981992797118,
+      "optimal_threshold": 0.27666666666666667,
+      "sensitivity_at_threshold": 0.9344262295081968,
+      "specificity_at_threshold": 0.32292917166866747
+    },
+    "xgb": {
+      "auc": 0.6647629543620728,
+      "balanced_accuracy": 0.607891681262669,
+      "sensitivity": 0.4786885245901639,
+      "specificity": 0.737094837935174,
+      "optimal_threshold": 0.05375578999519348,
+      "sensitivity_at_threshold": 0.9147540983606557,
+      "specificity_at_threshold": 0.33133253301320525
+    },
+    "ensemble": {
+      "auc": 0.6735166197626592,
+      "balanced_accuracy": 0.6259028201444512,
+      "sensitivity": 0.8688524590163934,
+      "specificity": 0.382953181272509,
+      "optimal_threshold": 0.24676460482180432
+    }
+  }
+}
