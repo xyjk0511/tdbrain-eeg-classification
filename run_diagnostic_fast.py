@@ -1,49 +1,68 @@
-"""Fast MDD vs nonMDD diagnostic — fixed hyperparams, no grid search, no permutation."""
-import json, datetime, numpy as np, pandas as pd
+"""MDD vs nonMDD diagnostic — light GridSearchCV + permutation test, n_jobs=2."""
+import json, datetime, numpy as np
 from pathlib import Path
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.metrics import roc_auc_score, confusion_matrix, roc_curve
-from sklearn.model_selection import StratifiedGroupKFold
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.model_selection import StratifiedGroupKFold, GridSearchCV, cross_val_score
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
 
-from config import PARTICIPANTS_TSV, CONDITIONS, N_FEATURES_SELECT
+from config import CONDITIONS, N_FEATURES_SELECT
 
 CACHE_DIR = Path("cache_diagnostic")
 RS = 42
+N_JOBS = 2
+N_PERM = 10
 
 
 def load_cached_features():
-    """Load cached .npz features for all DISCOVERY subjects."""
     feats = {}
     for cond in CONDITIONS:
         feats[cond] = {}
         for npz in (CACHE_DIR / cond).glob("*.npz"):
-            sid = npz.stem
             data = np.load(npz)
-            feats[cond][sid] = (data["feat"], str(data["label"]))
+            feats[cond][npz.stem] = (data["feat"], str(data["label"]))
     return feats
 
 
-def build_pipes():
-    def _s(): return ("smote", SMOTE(random_state=RS, k_neighbors=5))
-    def _k(): return ("selector", SelectKBest(f_classif, k=N_FEATURES_SELECT))
-    return {
-        "svm": ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
-            ("clf", SVC(kernel="rbf", C=1, class_weight="balanced", probability=True, random_state=RS))]),
-        "rf": ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
-            ("clf", RandomForestClassifier(n_estimators=300, class_weight="balanced", random_state=RS))]),
-        "xgb": ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
-            ("clf", XGBClassifier(n_estimators=100, max_depth=3, use_label_encoder=False, eval_metric="logloss", random_state=RS))]),
-    }
+def _s(): return ("smote", SMOTE(random_state=RS, k_neighbors=5))
+def _k(): return ("selector", SelectKBest(f_classif, k=N_FEATURES_SELECT))
+
+
+MODEL_REGISTRY = {
+    "svm": (
+        ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
+            ("clf", SVC(kernel="rbf", probability=True, random_state=RS))]),
+        {"clf__C": [1, 10], "clf__class_weight": [None, "balanced"]},
+    ),
+    "rf": (
+        ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
+            ("clf", RandomForestClassifier(random_state=RS))]),
+        {"clf__n_estimators": [100, 300], "clf__class_weight": [None, "balanced"]},
+    ),
+    "xgb": (
+        ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
+            ("clf", XGBClassifier(eval_metric="logloss", random_state=RS))]),
+        {"clf__n_estimators": [100, 300], "clf__max_depth": [3, 5]},
+    ),
+}
+
+FIXED_PIPES = {
+    "svm": ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
+        ("clf", SVC(kernel="rbf", probability=True, class_weight="balanced", random_state=RS))]),
+    "rf": ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
+        ("clf", RandomForestClassifier(n_estimators=100, class_weight="balanced", random_state=RS))]),
+    "xgb": ImbPipeline([("scaler", StandardScaler()), _s(), _k(),
+        ("clf", XGBClassifier(n_estimators=100, max_depth=3, eval_metric="logloss", random_state=RS))]),
+}
 
 
 if __name__ == "__main__":
-    print("=== Fast MDD vs nonMDD Diagnostic ===")
+    print("=== MDD vs nonMDD Diagnostic (GridSearchCV + Perm) ===")
     feats = load_cached_features()
     print(f"Cached: EO={len(feats['EO'])}, EC={len(feats['EC'])}")
 
@@ -52,23 +71,35 @@ if __name__ == "__main__":
     y_str = np.array([feats[CONDITIONS[0]][s][1] for s in common])
     groups = np.array(common)
 
-    # MDD=1 (positive), nonMDD=0 — avoid LabelEncoder alphabetical inversion
+    # MDD=1 (positive), nonMDD=0
     y = np.array([1 if s == "MDD" else 0 for s in y_str])
     mdd_idx = 1
-    counts = dict(zip(*np.unique(y_str, return_counts=True)))
+    counts = {"MDD": int((y == 1).sum()), "nonMDD": int((y == 0).sum())}
     print(f"Subjects: {len(common)}, X: {X.shape}, labels: {counts}")
 
-    cv = StratifiedGroupKFold(n_splits=5)
-    pipes = build_pipes()
-    results = {}
+    outer_cv = StratifiedGroupKFold(n_splits=5)
+    inner_cv = StratifiedGroupKFold(n_splits=3)
 
-    for name, pipe in pipes.items():
-        print(f"\n  {name}...", end=" ", flush=True)
+    # Permutation setup
+    rng = np.random.RandomState(RS)
+    unique_groups = np.unique(groups)
+    g_label = {g: y[groups == g][0] for g in unique_groups}
+    g_vals = np.array([g_label[g] for g in unique_groups])
+
+    def _perm_y():
+        pm = dict(zip(unique_groups, rng.permutation(g_vals)))
+        return np.array([pm[g] for g in groups])
+
+    results = {}
+    for name, (pipe, param_grid) in MODEL_REGISTRY.items():
+        print(f"\n  {name} (GridSearchCV)...", end=" ", flush=True)
         probas, preds, idxs = [], [], []
-        for fold, (tr, te) in enumerate(cv.split(X, y, groups)):
-            pipe.fit(X[tr], y[tr])
-            probas.append(pipe.predict_proba(X[te])[:, mdd_idx])
-            preds.append(pipe.predict(X[te]))
+        for fold, (tr, te) in enumerate(outer_cv.split(X, y, groups)):
+            gs = GridSearchCV(pipe, param_grid, cv=inner_cv, scoring="roc_auc",
+                              refit=True, n_jobs=N_JOBS)
+            gs.fit(X[tr], y[tr], groups=groups[tr])
+            probas.append(gs.predict_proba(X[te])[:, mdd_idx])
+            preds.append(gs.predict(X[te]))
             idxs.append(te)
             print(f"f{fold}", end=" ", flush=True)
 
@@ -89,23 +120,37 @@ if __name__ == "__main__":
         sen2 = tp2 / (tp2 + fn2) if (tp2 + fn2) > 0 else 0.0
         spe2 = tn2 / (tn2 + fp2) if (tn2 + fp2) > 0 else 0.0
 
+        # Permutation test
+        print(f"perm", end="", flush=True)
+        fixed = FIXED_PIPES[name]
+        perm_scores = []
+        for pi in range(N_PERM):
+            s = cross_val_score(fixed, X, _perm_y(), groups=groups,
+                                cv=outer_cv, scoring="roc_auc", n_jobs=N_JOBS).mean()
+            perm_scores.append(s)
+            print(".", end="", flush=True)
+        pvalue = (np.sum(np.array(perm_scores) >= auc) + 1) / (N_PERM + 1)
+
         results[name] = {
             "auc": float(auc), "balanced_accuracy": float(ba),
             "sensitivity": float(sen), "specificity": float(spe),
             "optimal_threshold": opt_t,
             "sensitivity_at_threshold": float(sen2),
             "specificity_at_threshold": float(spe2),
+            "permutation_pvalue": float(pvalue),
         }
-        print(f"AUC={auc:.3f} BA={ba:.3f} SEN={sen:.3f} SPE={spe:.3f}")
+        print(f" AUC={auc:.3f} BA={ba:.3f} SEN={sen:.3f} SPE={spe:.3f} p={pvalue:.3f}")
 
     # Ensemble
     print("\n  ensemble...", end=" ", flush=True)
     ens_probas, ens_idxs = [], []
-    for tr, te in cv.split(X, y, groups):
+    for tr, te in outer_cv.split(X, y, groups):
         fold_p = []
-        for pipe in build_pipes().values():
-            pipe.fit(X[tr], y[tr])
-            fold_p.append(pipe.predict_proba(X[te])[:, mdd_idx])
+        for ename, (epipe, eparam) in MODEL_REGISTRY.items():
+            gs = GridSearchCV(epipe, eparam, cv=inner_cv, scoring="roc_auc",
+                              refit=True, n_jobs=N_JOBS)
+            gs.fit(X[tr], y[tr], groups=groups[tr])
+            fold_p.append(gs.predict_proba(X[te])[:, mdd_idx])
         ens_probas.append(np.mean(fold_p, axis=0))
         ens_idxs.append(te)
     ens_order = np.argsort(np.concatenate(ens_idxs))
@@ -121,23 +166,22 @@ if __name__ == "__main__":
     results["ensemble"] = {
         "auc": ens_auc, "balanced_accuracy": float(ens_ba),
         "sensitivity": ens_sen, "specificity": ens_spe,
-        "optimal_threshold": ens_t,
+        "optimal_threshold": ens_t, "permutation_pvalue": None,
     }
     print(f"AUC={ens_auc:.3f} BA={ens_ba:.3f} SEN={ens_sen:.3f} SPE={ens_spe:.3f}")
 
-    # Summary
     print("\n=== Results ===")
     for n, m in results.items():
+        pv = m.get('permutation_pvalue')
+        ps = f"p={pv:.3f}" if pv is not None else "p=N/A"
         print(f"{n}: AUC={m['auc']:.3f}  BA={m['balanced_accuracy']:.3f}  "
-              f"SEN={m['sensitivity']:.3f}  SPE={m['specificity']:.3f}")
+              f"SEN={m['sensitivity']:.3f}  SPE={m['specificity']:.3f}  {ps}")
 
     output = {
-        "task": "MDD_vs_nonMDD_diagnostic_fast",
+        "task": "MDD_vs_nonMDD_diagnostic",
         "timestamp": datetime.datetime.now().isoformat(),
-        "n_subjects": int(X.shape[0]),
-        "n_features": int(X.shape[1]),
-        "label_counts": {k: int(v) for k, v in counts.items()},
-        "models": results,
+        "n_subjects": int(X.shape[0]), "n_features": int(X.shape[1]),
+        "label_counts": counts, "models": results,
     }
     with open("results_diagnostic.json", "w", newline="\n", encoding="utf-8") as f:
         json.dump(output, f, indent=2)
