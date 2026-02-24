@@ -38,7 +38,7 @@ def classify(X, y, groups, n_splits=5, n_permutations=1000, random_state=42) -> 
             {"clf__n_estimators": [100, 300], "clf__max_depth": [None, 5, 10], "clf__class_weight": [None, "balanced"]},
         ),
         "xgb": (
-            ImbPipeline([("scaler", StandardScaler()), _smote(), _selector(), ("clf", XGBClassifier(use_label_encoder=False, eval_metric="logloss", random_state=rs))]),
+            ImbPipeline([("scaler", StandardScaler()), _smote(), _selector(), ("clf", XGBClassifier(eval_metric="logloss", random_state=rs))]),
             {"clf__n_estimators": [100, 300], "clf__max_depth": [2, 3, 4], "clf__learning_rate": [0.05, 0.1], "clf__subsample": [0.8, 1.0]},
         ),
     }
@@ -46,7 +46,7 @@ def classify(X, y, groups, n_splits=5, n_permutations=1000, random_state=42) -> 
     FIXED_PIPES = {
         "svm": ImbPipeline([("scaler", StandardScaler()), _smote(), _selector(), ("clf", SVC(kernel="rbf", probability=True, class_weight="balanced", random_state=rs))]),
         "rf":  ImbPipeline([("scaler", StandardScaler()), _smote(), _selector(), ("clf", RandomForestClassifier(n_estimators=100, class_weight="balanced", random_state=rs))]),
-        "xgb": ImbPipeline([("scaler", StandardScaler()), _smote(), _selector(), ("clf", XGBClassifier(n_estimators=100, max_depth=3, use_label_encoder=False, eval_metric="logloss", random_state=rs))]),
+        "xgb": ImbPipeline([("scaler", StandardScaler()), _smote(), _selector(), ("clf", XGBClassifier(n_estimators=100, max_depth=3, eval_metric="logloss", random_state=rs))]),
     }
 
     outer_cv = StratifiedGroupKFold(n_splits=n_splits)
