@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+.planning/phases/*/test.txt
+.planning/phases/*/write_verification.py
+bad_id.txt
+cols.txt
+test2.py
+test3.py
+test4.py
+test4.txt
+test_eo.py

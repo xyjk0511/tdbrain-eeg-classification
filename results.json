@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-02-23T16:31:09.759779",
+  "conditions": [
+    "EO",
+    "EC"
+  ],
+  "n_subjects": 493,
+  "n_features": 992,
+  "label_counts": {
+    "ADHD": 188,
+    "MDD": 305
+  },
+  "models": {
+    "svm": {
+      "auc": 0.7701081269619812,
+      "accuracy": 0.7200811359026369,
+      "sensitivity": 0.7967213114754098,
+      "specificity": 0.5957446808510638,
+      "permutation_pvalue": 0.000999000999000999,
+      "n_permutations": 1000,
+      "n_splits": 5
+    },
+    "rf": {
+      "auc": 0.7959713986745727,
+      "accuracy": 0.7647058823529411,
+      "sensitivity": 0.8622950819672132,
+      "specificity": 0.6063829787234043,
+      "permutation_pvalue": 0.000999000999000999,
+      "n_permutations": 1000,
+      "n_splits": 5
+    },
+    "xgb": {
+      "auc": 0.7963376351587025,
+      "accuracy": 0.7525354969574036,
+      "sensitivity": 0.8229508196721311,
+      "specificity": 0.6382978723404256,
+      "permutation_pvalue": 0.000999000999000999,
+      "n_permutations": 1000,
+      "n_splits": 5
+    }
+  }
+}

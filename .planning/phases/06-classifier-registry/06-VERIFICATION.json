@@ -1,0 +1,134 @@
+{
+  "phase": "06-classifier-registry",
+  "verified": "2026-02-23T10:51:53Z",
+  "status": "passed",
+  "score": "5/5 must-haves verified",
+  "re_verification": false,
+  "goal": "classify() returns per-model dict {svm, rf, xgb}, each with SelectKBest(k=50) inside Pipeline",
+  "truths_verified": [
+    {
+      "truth": "classify() returns a dict keyed by model name (svm, rf, xgb)",
+      "status": "VERIFIED",
+      "evidence": "Smoke test confirms set(results.keys()) == {'svm', 'rf', 'xgb'}"
+    },
+    {
+      "truth": "SelectKBest(k=50) is a Pipeline step in every model pipeline, never fit outside CV",
+      "status": "VERIFIED",
+      "evidence": "_selector() factory returns ('selector', SelectKBest(f_classif, k=N_FEATURES_SELECT)) used in all 3 MODEL_REGISTRY pipelines and FIXED_PIPES"
+    },
+    {
+      "truth": "XGBoost param grid includes max_depth: [2, 3, 4]",
+      "status": "VERIFIED",
+      "evidence": "Line 38 in classifier.py: 'clf__max_depth': [2, 3, 4] in xgb param_grid"
+    },
+    {
+      "truth": "Permutation test fixed_pipe includes the selector step matching the main pipeline structure",
+      "status": "VERIFIED",
+      "evidence": "FIXED_PIPES dict (lines 42-46) uses _selector() for all three models (svm, rf, xgb)"
+    },
+    {
+      "truth": "config.py exports N_FEATURES_SELECT = 50",
+      "status": "VERIFIED",
+      "evidence": "Line 22 in config.py: N_FEATURES_SELECT = 50"
+    }
+  ],
+  "requirements_satisfied": [
+    {
+      "requirement": "CLF-01",
+      "description": "Model registry supporting SVM / Random Forest / XGBoost",
+      "status": "SATISFIED",
+      "evidence": "MODEL_REGISTRY dict (lines 27-40) with three models"
+    },
+    {
+      "requirement": "CLF-02",
+      "description": "SelectKBest(k=50) as Pipeline step (not independent preprocessing)",
+      "status": "SATISFIED",
+      "evidence": "_selector() factory integrated into all pipelines, no external feature selection"
+    },
+    {
+      "requirement": "CLF-03",
+      "description": "XGBoost max_depth=[2,3,4] in inner CV grid",
+      "status": "SATISFIED",
+      "evidence": "Line 38: 'clf__max_depth': [2, 3, 4]"
+    },
+    {
+      "requirement": "CLF-04",
+      "description": "Permutation test fixed_pipe includes selector step",
+      "status": "SATISFIED",
+      "evidence": "FIXED_PIPES (lines 42-46) mirrors MODEL_REGISTRY structure with selector"
+    },
+    {
+      "requirement": "CLF-05",
+      "description": "classify() returns per-model results dict",
+      "status": "SATISFIED",
+      "evidence": "Lines 86-94: results[name] with all required metrics"
+    }
+  ],
+  "smoke_test": {
+    "passed": true,
+    "samples": 60,
+    "features": 100,
+    "folds": 3,
+    "permutations": 5,
+    "results": {
+      "svm_auc": 0.469,
+      "rf_auc": 0.413,
+      "xgb_auc": 0.399
+    },
+    "metrics_verified": ["auc", "accuracy", "sensitivity", "specificity", "permutation_pvalue", "n_permutations", "n_splits"]
+  },
+  "artifacts_verified": [
+    {
+      "path": "config.py",
+      "provides": "N_FEATURES_SELECT constant",
+      "status": "VERIFIED",
+      "details": "Line 22: N_FEATURES_SELECT = 50"
+    },
+    {
+      "path": "classifier.py",
+      "provides": "model registry + multi-model nested CV + per-model results",
+      "status": "VERIFIED",
+      "details": "Lines 27-40: MODEL_REGISTRY dict with (pipe, param_grid) tuples"
+    },
+    {
+      "path": "classifier.py",
+      "provides": "classify() function",
+      "status": "VERIFIED",
+      "details": "Lines 14-96: classify(X, y, groups, n_splits=5, n_permutations=1000, random_state=42) -> dict"
+    }
+  ],
+  "key_links_verified": [
+    {
+      "from": "classifier.py Pipeline",
+      "to": "SelectKBest",
+      "via": "selector step",
+      "status": "WIRED",
+      "details": "_selector() factory creates named 'selector' step used in all pipelines"
+    },
+    {
+      "from": "classifier.py permutation fixed_pipe",
+      "to": "selector step",
+      "via": "FIXED_PIPES structure",
+      "status": "WIRED",
+      "details": "Lines 42-46: FIXED_PIPES uses _selector() for all three models"
+    },
+    {
+      "from": "classifier.py MODEL_REGISTRY",
+      "to": "GridSearchCV",
+      "via": "nested CV loop",
+      "status": "WIRED",
+      "details": "Lines 60-94: Loop over MODEL_REGISTRY.items(), GridSearchCV with inner_cv"
+    },
+    {
+      "from": "classifier.py results",
+      "to": "per-model metrics",
+      "via": "results dict",
+      "status": "WIRED",
+      "details": "Lines 86-94: results[name] populated with all required metrics"
+    }
+  ],
+  "anti_patterns": [],
+  "conclusion": "All must-haves verified. Phase goal achieved. Ready to proceed.",
+  "verifier": "Claude (gsd-verifier)",
+  "verified_timestamp": "2026-02-23T10:51:53Z"
+}
