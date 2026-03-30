@@ -17,6 +17,12 @@
 
 ![TDBRAIN summary card](assets/summary-card.svg)
 
+### Visual snapshot / 可视化结果
+
+| ROC | Permutation Test |
+|-----|------------------|
+| ![Ensemble ROC](assets/ensemble_roc.png) | ![Permutation null distribution](assets/permutation_null_dist.png) |
+
 Resting-state EEG classification pipeline for distinguishing psychiatric conditions on the **TDBRAIN** dataset, with subject-level validation, feature engineering, and statistically validated performance.
 
 一个基于 **TDBRAIN** 数据集的静息态脑电分类项目，重点在于受试者级验证、特征工程，以及经过统计检验的模型表现。
