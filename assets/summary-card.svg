@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320">
+  <rect width="1200" height="320" fill="#f8fafc"/>
+  <rect x="24" y="24" width="1152" height="272" rx="20" fill="#ffffff" stroke="#ddd6fe" stroke-width="2"/>
+  <text x="48" y="72" font-size="34" font-family="Arial" font-weight="700" fill="#0f172a">TDBRAIN EEG Classification</text>
+  <text x="48" y="108" font-size="18" font-family="Arial" fill="#475569">MDD vs ADHD · 992 EEG features · group-aware cross-validation</text>
+  <rect x="48" y="138" width="230" height="118" rx="16" fill="#eff6ff"/>
+  <text x="68" y="178" font-size="18" font-family="Arial" fill="#1d4ed8">Best AUC</text>
+  <text x="68" y="225" font-size="42" font-family="Arial" font-weight="700" fill="#1e3a8a">0.798</text>
+  <rect x="308" y="138" width="230" height="118" rx="16" fill="#f0fdf4"/>
+  <text x="328" y="178" font-size="18" font-family="Arial" fill="#15803d">Subjects</text>
+  <text x="328" y="225" font-size="42" font-family="Arial" font-weight="700" fill="#166534">493</text>
+  <rect x="568" y="138" width="250" height="118" rx="16" fill="#faf5ff"/>
+  <text x="588" y="178" font-size="18" font-family="Arial" fill="#7e22ce">Validation</text>
+  <text x="588" y="225" font-size="22" font-family="Arial" font-weight="700" fill="#6b21a8">Group CV + Permutation Test</text>
+  <rect x="848" y="138" width="280" height="118" rx="16" fill="#fff7ed"/>
+  <text x="868" y="178" font-size="18" font-family="Arial" fill="#c2410c">Project Value</text>
+  <text x="868" y="218" font-size="24" font-family="Arial" font-weight="700" fill="#9a3412">Interpretable EEG ML Pipeline</text>
+</svg>
