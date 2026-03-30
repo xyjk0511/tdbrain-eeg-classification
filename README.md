@@ -1,8 +1,24 @@
-# TDBRAIN: EEG-Based MDD vs ADHD Classification
+# TDBRAIN EEG Classification / TDBRAIN 脑电分类项目
 
-Resting-state EEG classifier distinguishing Major Depressive Disorder (MDD) from Attention Deficit Hyperactivity Disorder (ADHD) using the [TDBRAIN dataset](https://brainclinics.com/resources/).
+Resting-state EEG classification pipeline for distinguishing psychiatric conditions on the **TDBRAIN** dataset, with subject-level validation, feature engineering, and statistically validated performance.
 
-## Results
+一个基于 **TDBRAIN** 数据集的静息态脑电分类项目，重点在于受试者级验证、特征工程，以及经过统计检验的模型表现。
+
+---
+
+## Overview / 项目概述
+
+**Goal / 目标**
+- Classify **Major Depressive Disorder (MDD)** versus **ADHD** from resting-state EEG.
+- 使用静息态 EEG 区分 **抑郁症（MDD）** 与 **注意缺陷多动障碍（ADHD）**。
+
+This repository represents a practical EEG ML workflow rather than a toy example.
+
+这个仓库体现的是一个真实 EEG 机器学习工作流，而不是简单的示例代码。
+
+---
+
+## Results / 核心结果
 
 | Model | AUC | Accuracy | Sensitivity | Specificity | p-value |
 |-------|-----|----------|-------------|-------------|---------|
@@ -11,102 +27,128 @@ Resting-state EEG classifier distinguishing Major Depressive Disorder (MDD) from
 | XGBoost | 0.796 | 0.753 | 0.823 | 0.638 | < 0.001 |
 | **Ensemble (soft-vote)** | **0.798** | — | — | — | — |
 
-- 493 subjects (305 MDD, 188 ADHD), dual-condition (eyes-open + eyes-closed)
-- 5-fold StratifiedGroupKFold with strict subject isolation
-- Permutation test: 1000 permutations, all models p < 0.001
+### Dataset summary / 数据概况
+- **493 subjects** (305 MDD, 188 ADHD)
+- dual-condition EEG: **eyes-open + eyes-closed**
+- strict **5-fold StratifiedGroupKFold** subject isolation
+- **1000-permutation test**, all main models with **p < 0.001**
 
-## Features (992 dimensions)
+---
 
-Per condition (EO/EC, 496 each), concatenated:
+## Feature Design / 特征设计
 
-| Feature | Dimensions | Source |
-|---------|-----------|--------|
-| Absolute band power | 130 | 5 bands x 26 channels |
-| Relative band power | 130 | 5 bands x 26 channels |
-| TBR + FAA | 2 | Theta/Beta ratio, Frontal Alpha Asymmetry |
-| Hjorth parameters | 78 | Activity/Mobility/Complexity x 26 channels |
-| Broadband spectral entropy | 26 | 26 channels |
-| Per-band spectral entropy | 130 | 5 bands x 26 channels |
+The pipeline uses **992 dimensions** of EEG-derived features, combining both eyes-open and eyes-closed conditions.
 
-### Top SHAP Features (MDD vs ADHD)
+该项目使用 **992 维 EEG 特征**，融合了睁眼与闭眼两种静息态条件。
 
-1. `EO_hjorth_comp_T3` — Hjorth Complexity at left temporal
-2. `EO_abs_delta_T3` — Delta power at left temporal
-3. `EC_abs_delta_T4` — Delta power at right temporal (eyes-closed)
-4. `EO_abs_delta_C3` — Delta power at left central
-5. `EC_hjorth_mob_T5` — Hjorth Mobility at left posterior temporal
+### Feature families / 特征类别
+- absolute band power
+- relative band power
+- TBR + FAA
+- Hjorth parameters
+- broadband spectral entropy
+- per-band spectral entropy
 
-Temporal and delta-band features dominate, consistent with literature on MDD/ADHD EEG differences.
+### Why this matters / 为什么这很重要
+Instead of using a fully black-box model, the project emphasizes interpretable signal features with links to EEG literature.
 
-## Pipeline
+它没有直接依赖黑箱模型，而是强调与 EEG 文献相呼应、可解释的特征设计。
 
-```
+---
+
+## Pipeline / 技术流程
+
+```text
 Raw EEG (.bdf)
-  → Average reference + 1-45 Hz bandpass
-  → 2s epochs + 150µV artifact rejection
-  → Feature extraction (496 dims per condition)
-  → EO + EC concatenation (992 dims)
-  → ImbPipeline: StandardScaler → SMOTE → SelectKBest(k=50) → Classifier
-  → 5-fold nested CV (outer: evaluation, inner: hyperparameter tuning)
-  → Youden-index optimal threshold
-  → Permutation test (1000 iterations)
+  → rereference + filtering
+  → epoching + artifact rejection
+  → feature extraction
+  → EO + EC concatenation
+  → train/validation split with subject isolation
+  → model selection and evaluation
+  → permutation test and interpretation
 ```
 
-## Project Structure
+### Key modeling choices / 关键建模设计
+- group-aware cross-validation to prevent subject leakage
+- oversampling and feature selection inside the training pipeline
+- threshold optimization via Youden index
+- statistical significance testing via permutation
 
-```
-config.py                  # Dataset paths, EEG channels, frequency bands, constants
-data_loader.py             # Load TDBRAIN participants and raw EEG files
-preprocessor.py            # Re-reference, filter, epoch, artifact rejection
-feature_extractor.py       # PSD, Hjorth, spectral entropy extraction
-classifier.py              # Model registry, nested CV, ensemble, permutation test
-connectivity_extractor.py  # wPLI functional connectivity (Phase 11, for future use)
-main.py                    # Full pipeline: load → preprocess → extract → classify
-results.json               # Classification results
-shap_summary.json          # SHAP feature importance (top 20)
+---
+
+## Repository Structure / 仓库结构
+
+```text
+config.py                  # dataset paths, EEG channels, constants
+preprocessor.py            # filtering, rereferencing, epoching, artifact rejection
+feature_extractor.py       # PSD, Hjorth, entropy features
+classifier.py              # model training, validation, ensemble, permutation test
+data_loader.py             # raw EEG loading
+connectivity_extractor.py  # related connectivity features / extensions
+main.py                    # end-to-end pipeline entry
+results.json               # result summary
+shap_summary.json          # SHAP-based interpretation summary
+tests/                     # tests
 ```
 
-## Setup
+---
+
+## Why this project matters / 为什么这个项目重要
+
+This is one of the clearest examples of how I approach biomedical ML problems:
+- domain-aware feature engineering
+- strict leakage control
+- statistically responsible evaluation
+- balancing interpretability and performance
+
+这个项目能很好体现我做生物医学 ML 的方式：
+- 领域驱动的特征工程
+- 严格避免泄漏
+- 更负责任的统计验证
+- 在可解释性与性能之间找平衡
+
+---
+
+## Reproducibility / 复现说明
 
 ### Requirements
-
 - Python 3.11+
-- TDBRAIN dataset (BDF format)
+- access to the TDBRAIN dataset
 
 ### Install
-
 ```bash
 pip install mne numpy scipy scikit-learn xgboost imbalanced-learn shap antropy mne-connectivity
 ```
 
-### Configure
-
-Edit `config.py` to set your dataset path:
-
+### Configure dataset path
 ```python
 DATASET_ROOT = Path("/path/to/tdbrain_dataset")
 ```
 
 ### Run
-
 ```bash
 python main.py
 ```
 
-Output: `results.json` + `shap_summary.json`
+Outputs:
+- `results.json`
+- `shap_summary.json`
 
-## Methodology Notes
+---
 
-- **No data leakage**: Feature selection (SelectKBest) and oversampling (SMOTE) are inside the CV pipeline, never applied to the full dataset before splitting
-- **Subject isolation**: StratifiedGroupKFold ensures no subject appears in both train and test folds
-- **SMOTE placement**: Inside ImbPipeline, applied only to training folds
-- **Permutation test**: Group-level label permutation preserving subject structure
-- **Threshold optimization**: Youden index (max sensitivity + specificity - 1) on OOF predictions
+## Notes / 说明
 
-## Dataset
+This repository is intended as a research-oriented project repository.
 
-[TDBRAIN](https://brainclinics.com/resources/) — Two Decades of BRAIN data. Resting-state EEG recordings from psychiatric patients. Access requires registration.
+本仓库更适合作为研究型项目仓库来理解。
 
-## License
+A future cleanup would likely include:
+- cleaner experiment configuration
+- clearer data preparation docs
+- better visualization of results and feature importance
 
-MIT
+后续如果继续整理，我会优先补充：
+- 更清晰的实验配置入口
+- 更明确的数据准备说明
+- 更完整的结果图和解释性可视化
